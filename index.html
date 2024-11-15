@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Red</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 24px;
+            text-align: center;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .result {
+            background-color: #e7f3fe;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculadora de Red</h1>
+    <label for="ip">Dirección IP:</label>
+    <input type="text" id="ip" placeholder="Ejemplo: 192.168.1.1">
+
+    <label for="prefix">Prefijo (CIDR):</label>
+    <select id="prefix">
+        <option value="24">/24</option>
+        <option value="16">/16</option>
+        <option value="8">/8</option>
+        <!-- Agrega más opciones según lo necesario -->
+    </select>
+
+    <button onclick="calculate()">Calcular</button>
+
+    <div id="results" class="result" style="display:none;">
+        <p><strong>Dirección de Red:</strong> <span id="networkAddress"></span></p>
+        <p><strong>Dirección de Broadcast:</strong> <span id="broadcastAddress"></span></p>
+        <p><strong>Rango de IPs:</strong> <span id="ipRange"></span></p>
+    </div>
+</div>
+
+<script>
+    function ipToBinary(ip) {
+        return ip.split('.').map(num => parseInt(num).toString(2).padStart(8, '0')).join('');
+    }
+
+    function binaryToIp(binary) {
+        return binary.match(/.{1,8}/g).map(bin => parseInt(bin, 2)).join('.');
+    }
+
+    function calculate() {
+        const ip = document.getElementById("ip").value;
+        const prefix = parseInt(document.getElementById("prefix").value);
+        
+        const binaryIp = ipToBinary(ip);
+        const networkBinary = binaryIp.substring(0, prefix).padEnd(32, '0');
+        const broadcastBinary = binaryIp.substring(0, prefix).padEnd(32, '1');
+
+        const networkAddress = binaryToIp(networkBinary);
+        const broadcastAddress = binaryToIp(broadcastBinary);
+
+        // Rango de IPs (excluyendo dirección de red y de broadcast)
+        const startIpBinary = networkBinary.substring(0, 31) + '1';
+        const endIpBinary = broadcastBinary.substring(0, 31) + '0';
+        const ipRange = `${binaryToIp(startIpBinary)} - ${binaryToIp(endIpBinary)}`;
+
+        document.getElementById("networkAddress").textContent = networkAddress;
+        document.getElementById("broadcastAddress").textContent = broadcastAddress;
+        document.getElementById("ipRange").textContent = ipRange;
+        document.getElementById("results").style.display = "block";
+    }
+</script>
+
+</body>
+</html>
